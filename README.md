@@ -104,6 +104,12 @@ Open your browser at [http://localhost:8080](http://localhost:8080).
 - **Leaflet.js** & **Leaflet.markercluster**
 - **CartoDB Positron**: Minimal grayscale tile layer
 
+### License
+
+Code released under the **[MIT License](./LICENSE)** — © 2026 hai.network. See the [LICENSE](./LICENSE) file for details.
+
+The datasets in `data/` and the raw files (`bts_data.json`, `bts_data_eolo.json`, `tuscany.geojson`) are redistributed from ARPAT and ISTAT open data; they remain subject to the original terms of those sources. Please check the [ARPAT open data portal](https://www.arpat.toscana.it/impianti-di-radiocomunicazione/) for the applicable reuse terms and keep the source attribution when reusing them.
+
 ---
 
 <a name="italiano"></a>
@@ -205,3 +211,9 @@ Apri il browser all'indirizzo [http://localhost:8080](http://localhost:8080).
 - **ISTAT**: Confini delle unità amministrative a fini statistici (WGS84 EPSG:4326)
 - **Leaflet.js** & **Leaflet.markercluster**
 - **CartoDB Positron**: Tile layer grayscale minimale
+
+### Licenza
+
+Codice rilasciato sotto **[Licenza MIT](./LICENSE)** — © 2026 hai.network. Vedi il file [LICENSE](./LICENSE) per i dettagli.
+
+I dataset in `data/` e i file grezzi (`bts_data.json`, `bts_data_eolo.json`, `tuscany.geojson`) sono ridistribuiti a partire dai dati aperti ARPAT e ISTAT; restano soggetti ai termini originali di tali fonti. Verifica i termini di riuso sul [portale open data ARPAT](https://www.arpat.toscana.it/impianti-di-radiocomunicazione/) e mantieni l'attribuzione della fonte in caso di riutilizzo.
