@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Opnet & Eolo BTS Toscana — Mappa Impianti Radio Base</title>
+  <meta name="description" content="Mappa interattiva e catalogo statico degli impianti radio base (BTS) Opnet (ex-Linkem) ed Eolo (ex-NGI) in Toscana, basata su dati ARPAT.">
+  
+  <!-- Leaflet & Leaflet.markercluster (CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="app">
+    
+    <!-- Top Header Bar -->
+    <header class="app-header">
+      <div class="brand-section">
+        <button id="btn-toggle-sidebar" class="btn btn-icon sidebar-toggle-btn" title="Apri/Chiudi Menu Filtri" aria-label="Menu Filtri">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="brand-title">
+          <span class="badge-opnet">BTS</span>
+          <span>TOSCANA</span>
+        </div>
+        <div class="brand-subtitle">
+          Opnet (ex-Linkem) & Eolo (ex-NGI)
+        </div>
+      </div>
+
+      <!-- Operator Layer Switchers (Top Bar) -->
+      <div class="layer-switchers">
+        <label class="layer-toggle-btn active" id="label-layer-opnet" title="Mostra/Nascondi impianti Opnet (ex-Linkem)">
+          <input type="checkbox" id="layer-toggle-opnet" checked>
+          <span>Opnet</span>
+          <span class="layer-count" id="count-opnet-total">(149)</span>
+        </label>
+        <label class="layer-toggle-btn active" id="label-layer-eolo" title="Mostra/Nascondi impianti Eolo (ex-NGI)">
+          <input type="checkbox" id="layer-toggle-eolo" checked>
+          <span>Eolo</span>
+          <span class="layer-count" id="count-eolo-total">(171)</span>
+        </label>
+      </div>
+
+      <!-- Live Counters & Breakdown -->
+      <div class="header-stats">
+        <div class="stat-pill">
+          <span>Visualizzati:</span>
+          <strong><span id="stat-visible">0</span> / <span id="stat-total">0</span></strong>
+        </div>
+        <div class="stat-pill" title="Impianti con tecnologia 5G">
+          <span>5G:</span>
+          <strong><span id="stat-5g">0</span></strong>
+        </div>
+        <div class="stat-pill" title="Impianti con tecnologia 4G LTE / Wireless FWA">
+          <span>4G/FWA:</span>
+          <strong><span id="stat-4g">0</span></strong>
+        </div>
+        <div class="stat-pill" title="Impianti con ponte radio a microonde">
+          <span>Ponte Radio:</span>
+          <strong><span id="stat-pr">0</span></strong>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="header-actions">
+        <button id="reset-filters-btn" class="btn btn-sm" title="Reimposta tutti i filtri di ricerca">
+          Reimposta Filtri
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="app-workspace">
+
+      <!-- Left Sidebar (Search, Filters, Results List, Legend) -->
+      <aside id="sidebar" class="app-sidebar">
+        
+        <!-- Search Input -->
+        <div class="sidebar-section">
+          <div class="section-label">Ricerca Impianto</div>
+          <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="search-input" class="search-input" placeholder="Cerca nome, codice, comune, via..." autocomplete="off">
+            <button id="search-clear" class="search-clear" title="Cancella testo" aria-label="Cancella testo">&times;</button>
+          </div>
+        </div>
+
+        <!-- Province & Comune Selectors -->
+        <div class="sidebar-section">
+          <div class="section-label">Territorio</div>
+          <div class="filter-row">
+            <select id="province-select" class="select-control" title="Filtra per Provincia">
+              <option value="ALL">Tutte le Province</option>
+            </select>
+            <select id="comune-select" class="select-control" title="Filtra per Comune">
+              <option value="ALL">Tutti i Comuni</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Technology Pill Toggles -->
+        <div class="sidebar-section">
+          <div class="section-label">Tecnologia Trasmissiva</div>
+          <div class="tech-pills">
+            <button class="tech-pill-btn active" data-tech="ALL">
+              Tutte
+            </button>
+            <button class="tech-pill-btn" data-tech="5g">
+              5G
+            </button>
+            <button class="tech-pill-btn" data-tech="4g_fwa">
+              4G / FWA
+            </button>
+            <button class="tech-pill-btn" data-tech="ponte_radio">
+              Ponte Radio
+            </button>
+            <button class="tech-pill-btn" data-tech="wimax_other">
+              WiMAX / Altro
+            </button>
+          </div>
+        </div>
+
+        <!-- Station Results List -->
+        <div class="sidebar-results">
+          <div class="results-header">
+            <span>Elenco Impianti (<span id="results-count">0</span>)</span>
+          </div>
+          <ul id="station-list" class="station-list">
+            <!-- Populated dynamically via JS -->
+          </ul>
+        </div>
+
+        <!-- Map Legend -->
+        <div class="sidebar-legend">
+          <div class="section-label" style="margin-bottom: 4px;">Legenda Simboli</div>
+          
+          <!-- Opnet Legend Group -->
+          <div class="legend-group-title">
+            <span style="display:inline-block; width:8px; height:8px; background:#111827; border-radius:1px;"></span>
+            Opnet (ex-Linkem)
+          </div>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <circle cx="12" cy="12" r="8" fill="#111827" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="2.8" fill="#ffffff"/>
+                </svg>
+              </span>
+              <span>5G / 5G+4G</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <rect x="4" y="4" width="16" height="16" rx="2" fill="#374151" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="2.5" fill="#ffffff"/>
+                </svg>
+              </span>
+              <span>4G LTE</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <circle cx="12" cy="12" r="7.5" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="2.8" fill="#111827"/>
+                </svg>
+              </span>
+              <span>Ponte Radio</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <polygon points="12,3 21,12 12,21 3,12" fill="#4b5563" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="2" fill="#ffffff"/>
+                </svg>
+              </span>
+              <span>WiMAX / Altro</span>
+            </div>
+          </div>
+
+          <!-- Eolo Legend Group -->
+          <div class="legend-group-title" style="margin-top: 6px;">
+            <span style="display:inline-block; width:8px; height:8px; background:#2563eb; border-radius:1px;"></span>
+            Eolo (ex-NGI)
+          </div>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <circle cx="12" cy="12" r="8" fill="#1e3a8a" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="2.8" fill="#ffffff"/>
+                </svg>
+              </span>
+              <span>5G</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <rect x="4" y="4" width="16" height="16" rx="2" fill="#2563eb" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="2.5" fill="#ffffff"/>
+                </svg>
+              </span>
+              <span>Wireless + PR</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <circle cx="12" cy="12" r="7.5" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="2.8" fill="#2563eb"/>
+                </svg>
+              </span>
+              <span>Ponte Radio</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <polygon points="12,3 21,12 12,21 3,12" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="2" fill="#ffffff"/>
+                </svg>
+              </span>
+              <span>Wireless / Altro</span>
+            </div>
+          </div>
+
+        </div>
+
+      </aside>
+
+      <!-- Map Viewport -->
+      <main class="map-container">
+        <div id="map"></div>
+
+        <!-- Floating Map Utility Controls -->
+        <div class="map-floating-controls">
+          <button id="btn-reset-view" class="map-control-btn" title="Centra la visuale sull'intera Toscana">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Vista Toscana</span>
+          </button>
+          <button id="btn-toggle-boundary" class="map-control-btn active" title="Mostra/Nascondi il confine regionale ISTAT">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+            <span>Confine ISTAT</span>
+          </button>
+          <button id="btn-toggle-cluster" class="map-control-btn active" title="Attiva/Disattiva raggruppamento marker">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="9" r="4"></circle>
+              <circle cx="15" cy="15" r="4"></circle>
+            </svg>
+            <span>Cluster</span>
+          </button>
+        </div>
+
+        <!-- Floating Station Detail Panel -->
+        <div id="detail-panel" class="detail-panel">
+          <div id="detail-header-el" class="detail-header">
+            <div>
+              <div id="detail-title" class="detail-title">Nome Impianto</div>
+              <div id="detail-code" class="detail-val-mono" style="font-size: 11px; opacity: 0.85;">Codice</div>
+            </div>
+            <button id="detail-close" class="detail-close" title="Chiudi dettagli">&times;</button>
+          </div>
+          <div class="detail-body">
+            <div class="detail-row">
+              <div class="detail-label">Gestore</div>
+              <div id="detail-operator" class="detail-val">Opnet</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Località / Comune</div>
+              <div id="detail-location" class="detail-val">Comune (Provincia)</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Indirizzo</div>
+              <div id="detail-address" class="detail-val">Indirizzo</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Tecnologia Trasmissiva</div>
+              <div id="detail-tech" class="detail-val" style="font-weight: 600;">4G 5G Ponte radio</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Riferimento / Protocollo ARPAT</div>
+              <div id="detail-ref" class="detail-val-mono">Protocollo</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Coordinate WGS84</div>
+              <div id="detail-coords" class="detail-val-mono">00.000000, 00.000000</div>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button id="btn-copy-coords" class="btn btn-sm">
+              Copia Coords
+            </button>
+            <a id="btn-gmaps" class="btn btn-sm" target="_blank" rel="noopener noreferrer">
+              Google Maps &nearr;
+            </a>
+            <a id="btn-osm" class="btn btn-sm" target="_blank" rel="noopener noreferrer">
+              OSM &nearr;
+            </a>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <div>
+        Fonte dati: <a href="https://www.arpat.toscana.it/impianti-di-radiocomunicazione/" target="_blank" rel="noopener noreferrer">ARPAT — Catasto Impianti Radiocomunicazione Toscana</a> (Opnet & Eolo).
+      </div>
+      <div>
+        Mappa statica ad alta efficienza • Confini ISTAT WGS84
+      </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-msg">Notifica</div>
+
+  </div>
+
+  <!-- Leaflet & MarkerCluster JavaScript Libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
