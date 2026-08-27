@@ -52,51 +52,6 @@ OpNet/
 └── README.md                # Documentation and usage guide
 ```
 
-### Updating the Datasets
-
-If you have updated `bts_data.json` or `bts_data_eolo.json` files:
-
-1. Replace or update the JSON files in the repository root:
-   - `bts_data.json` for Opnet / Linkem.
-   - `bts_data_eolo.json` for Eolo / NGI.
-2. Run the preparation script:
-   ```bash
-   python scripts/prepare_data.py
-   ```
-   The script will automatically:
-   - Filter records for each operator.
-   - Validate and clean geographic coordinates (lat/lng WGS84).
-   - Classify technology and parse station codes.
-   - Generate `data/bts.json` and `data/bts_eolo.json`.
-   - Check/update the `data/tuscany.geojson` file.
-
-### Deploying to GitHub Pages
-
-To publish the site on **GitHub Pages**:
-
-1. Push all repository files to GitHub:
-   ```bash
-   git init
-   git add .
-   git commit -m "Add Opnet and Eolo BTS layers"
-   git branch -M main
-   git remote add origin https://github.com/<YOUR-USERNAME>/<YOUR-REPO>.git
-   git push -u origin main
-   ```
-2. In the repository settings (**Settings** > **Pages**):
-   - Under **Source**, select `Deploy from a branch`.
-   - Select the `main` branch and the `/ (root)` folder.
-   - Click **Save**.
-
-### Local Testing
-
-```bash
-# With Python 3
-python -m http.server 8080
-```
-
-Open your browser at [http://localhost:8080](http://localhost:8080).
-
 ### Data Sources & References
 
 - **ARPAT**: [Radiocommunication Installations Registry of the Tuscany Region](https://www.arpat.toscana.it/impianti-di-radiocomunicazione/)
@@ -159,51 +114,6 @@ OpNet/
 ├── bts_data_eolo.json        # Dati grezzi ARPAT Eolo
 └── README.md                # Documentazione e guida d'uso
 ```
-
-### Come Aggiornare i Dataset
-
-Se disponi di file aggiornati `bts_data.json` o `bts_data_eolo.json`:
-
-1. Sostituisci o aggiorna i file JSON nella radice del repository:
-   - `bts_data.json` per Opnet / Linkem.
-   - `bts_data_eolo.json` per Eolo / NGI.
-2. Esegui lo script di preparazione:
-   ```bash
-   python scripts/prepare_data.py
-   ```
-   Lo script eseguirà automaticamente:
-   - Il filtraggio dei record per ciascun operatore.
-   - La validazione e pulizia delle coordinate geografiche (lat/lng WGS84).
-   - La classificazione tecnologica e parsing dei codici stazione.
-   - La generazione di `data/bts.json` e `data/bts_eolo.json`.
-   - Il controllo/aggiornamento del file `data/tuscany.geojson`.
-
-### Distribuzione su GitHub Pages
-
-Per pubblicare il sito su **GitHub Pages**:
-
-1. Carica tutti i file del repository su GitHub:
-   ```bash
-   git init
-   git add .
-   git commit -m "Add Opnet and Eolo BTS layers"
-   git branch -M main
-   git remote add origin https://github.com/<TUO-USERNAME>/<TUO-REPO>.git
-   git push -u origin main
-   ```
-2. Nelle impostazioni del repository (**Settings** > **Pages**):
-   - In **Source**, seleziona `Deploy from a branch`.
-   - Seleziona il ramo `main` e la cartella `/ (root)`.
-   - Clicca su **Save**.
-
-### Test Locale
-
-```bash
-# Con Python 3
-python -m http.server 8080
-```
-
-Apri il browser all'indirizzo [http://localhost:8080](http://localhost:8080).
 
 ### Fonti Dati & Riferimenti
 
